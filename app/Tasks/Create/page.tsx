@@ -1,6 +1,50 @@
-import React from 'react'
+"use client"
+
+import { useState } from "react"
+import toast from "react-hot-toast";
+
 
 const page = () => {
+
+  const [task,setTask]=useState({
+    title:"",description:"",priority:"Medium",dueDate:"",status:"Pending"
+  })
+  console.log(task);
+  const[loading,setLoading]=useState(true)
+
+  const handleAddTask=async()=>{
+    try{
+      const response=await fetch("/api/tasks",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+        },
+        credentials:"include",body:JSON.stringify({
+          title:task.title,description:task.description,priority:task.priority,dueDate:task.dueDate,status:task.status
+        })
+      })
+
+      const data=await response.json()
+      if(!response.ok){
+        toast.error(data.message)
+        return;
+      }
+
+      toast.success("Task Added Successfull")
+      setLoading(false)
+      setTimeout(()=>{
+        window.location.href="/Tasks"
+      },1500)
+      
+
+    }catch(error){
+      console.error("Task Added error: ",error);
+      setLoading(false)
+      toast.error("Something went wrong")
+      
+    }
+  }
+
   return (
      <div className="min-h-screen bg-gray-100 flex">
 
@@ -52,6 +96,7 @@ const page = () => {
               </label>
               <input
                 type="text"
+                onChange={(e)=>setTask({...task,title:e.target.value})}
                 placeholder="Enter task title"
                 className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500"
               />
@@ -63,6 +108,7 @@ const page = () => {
               </label>
               <textarea
                 rows={4}
+                onChange={(e)=>setTask({...task,description:e.target.value})}
                 placeholder="Describe your task..."
                 className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500"
               />
@@ -74,7 +120,7 @@ const page = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Priority
                 </label>
-                <select className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500">
+                <select value={task?.priority} onChange={(e)=>setTask({...task,priority:e.target.value})} className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500">
                   <option value="">Select Priority</option>
                   <option>Low</option>
                   <option>Medium</option>
@@ -86,7 +132,7 @@ const page = () => {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Status
                 </label>
-                <select className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500">
+                <select value={task?.status} onChange={(e)=>setTask({...task,status:e.target.value})} className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500">
                   <option>Pending</option>
                   <option>In Progress</option>
                   <option>Completed</option>
@@ -101,19 +147,20 @@ const page = () => {
               </label>
               <input
                 type="date"
+                onChange={(e)=>setTask({...task,dueDate:e.target.value})}
                 className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
             <div className="flex justify-end gap-4 pt-4">
               <a
-                href="/tasks"
+                href="/Tasks"
                 className="px-6 py-3 border rounded-lg text-gray-600 hover:bg-gray-100"
               >
                 Cancel
               </a>
 
-              <button className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              <button onClick={handleAddTask} className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
                 Create Task
               </button>
             </div>
@@ -123,6 +170,7 @@ const page = () => {
         </div>
 
       </main>
+      
     </div>
   )
 }

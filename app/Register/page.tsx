@@ -1,6 +1,55 @@
-import React from 'react'
+"use client"
+
+import React, { useState } from 'react'
+import toast from 'react-hot-toast'
 
 const page = () => {
+
+    const [userData,setUserdata]=useState({
+      name:"",email:"",password:"",confirmPass:""
+    })
+
+    const RegisterBtn=(e:any)=>{
+      e.preventDefault()
+      if(userData.password==userData.confirmPass){
+        handleRegister()
+      }else{
+        toast.error("Password do not match")
+      }
+    }
+
+    const handleRegister=async()=>{
+
+      try{
+      const response=await fetch("/api/auth/register",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+        },
+        credentials:"include",body:JSON.stringify({
+          name:userData.name,email:userData.email,password:userData.password
+        })
+      })
+
+      const data=await response.json()
+      if(!response.ok){
+        toast.error(data.message)
+        return;
+      }
+
+      toast.success("Register Successfull")
+      setTimeout(()=>{
+        window.location.href="/Login"
+      },1500)
+      
+
+    }catch(error){
+      console.error("Login error: ",error);
+      toast.error("Something went wrong")
+      
+    }
+    }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-8">
 
@@ -28,6 +77,7 @@ const page = () => {
             </label>
             <input
               type="text"
+              onChange={(e)=>setUserdata({...userData,name:e.target.value})}
               placeholder="Enter your name"
               className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500"
             />
@@ -39,6 +89,7 @@ const page = () => {
             </label>
             <input
               type="email"
+              onChange={(e)=>setUserdata({...userData,email:e.target.value})}
               placeholder="Enter your email"
               className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500"
             />
@@ -50,6 +101,7 @@ const page = () => {
             </label>
             <input
               type="password"
+              onChange={(e)=>setUserdata({...userData,password:e.target.value})}
               placeholder="Create a password"
               className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500"
             />
@@ -61,12 +113,13 @@ const page = () => {
             </label>
             <input
               type="password"
+              onChange={(e)=>setUserdata({...userData,confirmPass:e.target.value})}
               placeholder="Confirm your password"
               className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
-          <button className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition">
+          <button onClick={RegisterBtn} className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition">
             Create Account
           </button>
 

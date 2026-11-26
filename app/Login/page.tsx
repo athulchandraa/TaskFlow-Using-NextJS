@@ -1,6 +1,48 @@
-import React from 'react'
+"use client"
+
+import { useState } from "react"
+import toast from "react-hot-toast"
 
 const page = () => {
+
+  const [userData,setUserdata]=useState({
+    email:"",password:""
+  })
+
+  //Handling Login
+  const handleLogin=async(e:any)=>{
+    e.preventDefault()
+
+    try{
+      const response=await fetch("/api/auth/login",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+        },
+        credentials:"include",body:JSON.stringify({
+          email:userData.email,password:userData.password
+        })
+      })
+
+      const data=await response.json()
+      if(!response.ok){
+        toast.error(data.message)
+        return;
+      }
+
+      toast.success("Login Successfull")
+      setTimeout(()=>{
+        window.location.href="/Dashboard"
+      },1500)
+      
+
+    }catch(error){
+      console.error("Login error: ",error);
+      toast.error("Something went wrong")
+      
+    }
+  }
+
   return (
      <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
@@ -24,6 +66,7 @@ const page = () => {
             </label>
             <input
               type="email"
+              onChange={(e)=>setUserdata({...userData,email:e.target.value})}
               placeholder="Enter your email"
               className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500"
             />
@@ -35,6 +78,7 @@ const page = () => {
             </label>
             <input
               type="password"
+              onChange={(e)=>setUserdata({...userData,password:e.target.value})}
               placeholder="Enter your password"
               className="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500"
             />
@@ -50,7 +94,7 @@ const page = () => {
             </a>
           </div>
 
-          <button className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700">
+          <button onClick={handleLogin} className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700">
             Sign In
           </button>
         </div>
